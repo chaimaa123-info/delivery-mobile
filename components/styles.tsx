@@ -96,22 +96,22 @@ inputGroup: {
    
   }, 
 
-// Style du bouton rond pour sélectionner
+
 selectButton: {
-    backgroundColor: '#007AFF', // Couleur de fond
-    borderRadius: 50, // Pour avoir un bouton rond
+    backgroundColor: '#007AFF', 
+    borderRadius: 50, 
     width: 50,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20, // Espace avant la section de sélection des versions
-    alignSelf: 'center', // Centrer horizontalement
+    marginBottom: 20, 
+    alignSelf: 'center', 
   },
 
   
   versionBar: {
     position: 'absolute',
-    top: 40, // Juste en dessous du logo
+    top: 40, 
     right: 10,
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -121,13 +121,12 @@ selectButton: {
   },
   
   versionOption: {
-    alignItems: 'center', // Centrer chaque option
-    marginBottom: 20, // Marge entre chaque version
+    alignItems: 'center',
+    marginBottom: 20,
   },
 
   versionButton: {
     backgroundColor: '#007AFF',
-   // borderRadius: 20, // Pour obtenir des boutons ronds
     paddingHorizontal: 15,
     paddingVertical: 8,
     marginHorizontal: 5,
@@ -137,7 +136,7 @@ selectButton: {
   }, 
   
   selectedVersion: {
-    backgroundColor: '#005BB5', // Couleur différente pour la version sélectionnée
+    backgroundColor: '#005BB5', 
   },
   
   versionText: {
@@ -148,7 +147,7 @@ selectButton: {
     
   versionMessage: {
     position: 'absolute',
-    top: 100, // Juste sous les boutons
+    top: 100, 
     right: 10,
     fontSize: 16,
     color: '#007AFF',
@@ -157,9 +156,9 @@ selectButton: {
   },  
   
   radioButton: {
-    flexDirection: 'row', // Disposition en ligne avec l'icône et le texte
+    flexDirection: 'row', 
     alignItems: 'center',
-    marginHorizontal: 15, // Marge horizontale entre les boutons
+    marginHorizontal: 15, 
   },
 
   radioCircle: {
@@ -231,4 +230,4 @@ const logoStyles = StyleSheet.create({
 });
 
 // Export des deux objets de style
-export { styles, logoStyles };  
+export { logoStyles, styles };
