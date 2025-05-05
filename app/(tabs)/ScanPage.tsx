@@ -1,13 +1,11 @@
 // ScanPage.tsx
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import React, { useState, useEffect, useRef } from 'react';
-import { Button, StyleSheet, Text, View, Animated, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useTourStore } from '../../store/useTourStore'; // adapte le chemin si nécessaire
-import { Alert } from 'react-native';  // Assurez-vous d'importer Alert
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Button, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTourStore } from '../../store/useTourStore';
 const { width } = Dimensions.get('window');
 
 

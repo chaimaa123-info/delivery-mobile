@@ -1,10 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';  // Si tu utilises Next.js pour la navigation
-import { usePathname } from 'expo-router';
-import { useEffect } from 'react';
-import { BackHandler } from 'react-native';
+import { usePathname, useRouter } from 'expo-router'; // Si tu utilises Next.js pour la navigation
+import React, { useEffect } from 'react';
+import { BackHandler, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 export default function HistoriqueScreen() {
@@ -39,7 +36,7 @@ export default function HistoriqueScreen() {
         </View>
       </ScrollView>
 
-      {/* Menu en bas de page */}
+      
       <View style={styles.bottomMenu}>
         <TouchableOpacity
           style={[styles.menuButton, pathname === '/HomePage' && styles.activeButton]}
@@ -113,7 +110,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 40,
     color: '#1e40af',
   },
   item: {

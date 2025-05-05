@@ -1,6 +1,6 @@
 // app/tabs/layout.tsx
-import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 
 export default function TabsLayout() {
   return (
@@ -32,7 +32,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="historique"  // Assure-toi que c'est exactement "historique"
+        name="historique"  
         options={{
           title: 'Historique',
           tabBarIcon: ({ color }) => (
