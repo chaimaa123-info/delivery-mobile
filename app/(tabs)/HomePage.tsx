@@ -33,21 +33,23 @@ export default function HomePage() {
 
   return (
     <View style={styles.container}>
-      {!isScanning && (
-        <TouchableOpacity onPress={() => router.push('/ScanPage')} style={styles.startScanButton}>
+      {/* Menu supérieur avec le bouton de scan */}
+      <View style={styles.topMenu}>
+        <Text style={styles.headerTitle}>Historique des Colis</Text>
+        <TouchableOpacity onPress={() => router.push('/ScanPage')} style={styles.scanButton}>
           <View style={styles.squareTopLeft} />
           <View style={styles.squareTopRight} />
           <View style={styles.squareBottomLeft} />
           <View style={styles.squareBottomRight} />
           <Ionicons name="scan" size={30} color="white" />
         </TouchableOpacity>
-      )}
+      </View>
 
       <View style={styles.historiqueContainer}>
-      <Text style={styles.infoText}>N° Expédition :</Text>
-      <Text style={styles.infoText}>Nbr de colis à récupérer :</Text>
-      <Text style={styles.infoText}>Nbr de colis à livrer :</Text>
-        <Text style={styles.sectionTitle}>Historique des colis :</Text>
+        <Text style={styles.infoText}>N° Expédition :</Text>
+        <Text style={styles.infoText}>Nbr de colis à récupérer :</Text>
+        <Text style={styles.infoText}>Nbr de colis à livrer :</Text>
+
         {allColis.length > 0 ? (
           <ScrollView contentContainerStyle={styles.historiqueList}>
             {allColis.map((code, index) => (
@@ -58,179 +60,142 @@ export default function HomePage() {
                   setShowOptions(true);
                 }}
               >
-                  <View style={[
-                  styles.colisBox,
-                  pinnedColis.includes(code) && { backgroundColor: '#fff8dc' }
-                ]}>
+                <View style={[styles.colisBox, pinnedColis.includes(code) && { backgroundColor: '#fff8dc' }]}>
                   <Text style={styles.colisTitle}>
                     Colis {index + 1}
                     {pinnedColis.includes(code) && <Text> 📌</Text>}
                     :
                   </Text>
                   <Text style={styles.codeText}>{code}</Text>
-    </View>
-  </TouchableOpacity>
-))}
+                </View>
+              </TouchableOpacity>
+            ))}
           </ScrollView>
         ) : (
           <Text style={styles.codeItem}>Aucun colis scanné.</Text>
         )}
       </View>
-      
+
       <Modal
-  transparent
-  visible={showOptions}
-  animationType="slide"
-  onRequestClose={() => setShowOptions(false)}
->
-  <TouchableWithoutFeedback onPress={() => setShowOptions(false)}>
-    <View style={styles.modalOverlay}>
-      <View style={styles.bottomSheet}>
-      <View style={styles.handleBar} />
+        transparent
+        visible={showOptions}
+        animationType="slide"
+        onRequestClose={() => setShowOptions(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowOptions(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.bottomSheet}>
+              <View style={styles.handleBar} />
+              {selectedColisIndex !== null && (() => {
+                const updatedAllColis = [...historique.flat(), ...colis];
+                const colisCode = updatedAllColis[selectedColisIndex];
+                const isPinned = pinnedColis.includes(colisCode);
 
-        {selectedColisIndex !== null && (() => {
-          const updatedAllColis = [...historique.flat(), ...colis];
-          const colisCode = updatedAllColis[selectedColisIndex];
-          const isPinned = pinnedColis.includes(colisCode);
+                return (
+                  <>
+                    <Text style={styles.modalColisTitle}>
+                      📦 Colis sélectionné : {colisCode}
+                    </Text>
 
-          return (
-            <>
-              <Text style={styles.modalColisTitle}>
-                📦 Colis sélectionné : {colisCode}
-              </Text>
+                    {/* Épingler / Désépingler */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (isPinned) {
+                          setPinnedColis((prev) => prev.filter((c) => c !== colisCode));
+                        } else {
+                          updatedAllColis.splice(selectedColisIndex, 1);
+                          updatedAllColis.unshift(colisCode);
+                          setColis(updatedAllColis);
+                          setHistorique([]);
+                          setPinnedColis((prev) => [...new Set([colisCode, ...prev])]);
+                        }
+                        setShowOptions(false);
+                      }}
+                    >
+                      <Text style={styles.sheetOption}>
+                        {isPinned ? '❌ Désépingler' : '📌 Épingler'}
+                      </Text>
+                    </TouchableOpacity>
 
-              {/* Épingler / Désépingler */}
-              <TouchableOpacity
-                onPress={() => {
-                  if (isPinned) {
-                    setPinnedColis((prev) => prev.filter((c) => c !== colisCode));
-                  } else {
-                    updatedAllColis.splice(selectedColisIndex, 1);
-                    updatedAllColis.unshift(colisCode);
-                    setColis(updatedAllColis);
-                    setHistorique([]);
-                    setPinnedColis((prev) => [...new Set([colisCode, ...prev])]);
-                  }
-                  setShowOptions(false);
-                }}
-              >
-                <Text style={styles.sheetOption}>
-                  {isPinned ? '❌ Désépingler' : '📌 Épingler'}
-                </Text>
-              </TouchableOpacity>
+                    {/* Supprimer */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        Alert.alert(
+                          'Confirmation',
+                          'Voulez-vous vraiment supprimer ce colis ?',
+                          [
+                            {
+                              text: 'Annuler',
+                              style: 'cancel',
+                            },
+                            {
+                              text: 'Supprimer',
+                              style: 'destructive',
+                              onPress: () => {
+                                supprimerColis(selectedColisIndex);
+                                setShowOptions(false);
+                              },
+                            },
+                          ],
+                          { cancelable: true }
+                        );
+                      }}
+                    >
+                      <Text style={styles.sheetOption}>🗑️ Supprimer</Text>
+                    </TouchableOpacity>
+                  </>
+                );
+              })()}
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
-              {/* Supprimer */}
-              <TouchableOpacity
-  onPress={() => {
-    Alert.alert(
-      'Confirmation',
-      'Voulez-vous vraiment supprimer ce colis ?',
-      [
-        {
-          text: 'Annuler',
-          style: 'cancel',
-        },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: () => {
-            supprimerColis(selectedColisIndex);
-            setShowOptions(false);
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  }}
->
-  <Text style={styles.sheetOption}>🗑️ Supprimer</Text>
-</TouchableOpacity>
+      {/* Menu en bas de page */}
+      <View style={styles.bottomMenu}>
+        <TouchableOpacity
+          style={[styles.menuButton, pathname === '/HomePage' && styles.activeButton]}
+          onPress={() => router.push('/HomePage')}
+        >
+          <Ionicons name="home" size={24} color={pathname === '/HomePage' ? '#007AFF' : 'black'} />
+          <Text style={[styles.menuButtonText, pathname === '/HomePage' && styles.activeText]}>
+            Accueil
+          </Text>
+        </TouchableOpacity>
 
-            </>
-          );
-        })()}
+        <TouchableOpacity
+          style={[styles.menuButton, pathname === '/search' && styles.activeButton]}
+          onPress={() => router.push('/search')}
+        >
+          <Ionicons name="search" size={24} color={pathname === '/search' ? '#007AFF' : 'black'} />
+          <Text style={[styles.menuButtonText, pathname === '/search' && styles.activeText]}>
+            Recherche
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.menuButton, pathname === '/historique' && styles.activeButton]}
+          onPress={() => router.push('/historique')}
+        >
+          <Ionicons name="time" size={24} color={pathname === '/historique' ? '#007AFF' : 'black'} />
+          <Text style={[styles.menuButtonText, pathname === '/historique' && styles.activeText]}>
+            L'historique
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.menuButton, pathname === '../login' && styles.activeButton]}
+          onPress={() => router.replace('../login')}
+        >
+          <Ionicons name="arrow-back" size={24} color={pathname === '../login' ? '#007AFF' : 'black'} />
+          <Text style={[styles.menuButtonText, pathname === '../login' && styles.activeText]}>
+            Retour
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
-  </TouchableWithoutFeedback>
-</Modal>
-
- {/* Menu en bas de page */}
-
-<View style={styles.bottomMenu}>
-  <TouchableOpacity
-    style={[
-      styles.menuButton,
-      pathname === '/HomePage' && styles.activeButton,
-    ]}
-    onPress={() => router.push('/HomePage')}
-  >
-    <Ionicons 
-      name="home"
-      size={24}
-      color={pathname === '/HomePage' ? '#007AFF' : 'black'}
-    />
-    <Text style={[styles.menuButtonText, pathname === '/HomePage' && styles.activeText]}>
-      Accueil
-    </Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    style={[
-      styles.menuButton,
-      pathname === '/search' && styles.activeButton,
-    ]}
-    onPress={() => router.push('/search')}
-  >
-    <Ionicons
-      name="search"
-      size={24}
-      color={pathname === '/search' ? '#007AFF' : 'black'}
-    />
-    <Text style={[styles.menuButtonText, pathname === '/search' && styles.activeText]}>
-      Recherche
-    </Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    style={[
-      styles.menuButton,
-      pathname === '/historique' && styles.activeButton,
-    ]}
-    onPress={() => router.push('/historique')}
-  >
-    <Ionicons
-      name="time"
-      size={24}
-      color={pathname === '/historique' ? '#007AFF' : 'black'}
-    />
-    <Text style={[styles.menuButtonText, pathname === '/historique' && styles.activeText]}>
-      L'historique
-    </Text>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    style={[
-      styles.menuButton,
-      pathname === '../login' && styles.activeButton,
-    ]}
-    onPress={() => router.replace('../login')}
-  >
-    <Ionicons
-      name="arrow-back"
-      size={24}
-      color={pathname === '../login' ? '#007AFF' : 'black'}
-    />
-    <Text style={[styles.menuButtonText, pathname === '../login' && styles.activeText]}>
-      Retour
-    </Text>
-  </TouchableOpacity>
-</View>
-</View>
-
   );
 }
-    
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -257,32 +222,32 @@ const styles = StyleSheet.create({
   },
   squareTopLeft: {
     position: 'absolute',
-    top: 22,
-    left: 23,
+    top: 19,
+    left: 19,
     width: 5,
     height: 5,
     backgroundColor: 'white',
   },
   squareTopRight: {
     position: 'absolute',
-    top: 22,
-    right: 23,
+    top: 19,
+    right: 19,
     width: 5,
     height: 5,
     backgroundColor: 'white',
   },
   squareBottomLeft: {
     position: 'absolute',
-    bottom: 22,
-    left: 23,
+    bottom: 19,
+    left: 19,
     width: 5,
     height: 5,
     backgroundColor: 'white',
   },
   squareBottomRight: {
     position: 'absolute',
-    bottom: 22,
-    right: 23,
+    bottom: 19,
+    right: 19,
     width: 5,
     height: 5,
     backgroundColor: 'white',
@@ -365,6 +330,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: 'rgb(86, 173, 234)',
     paddingVertical: 10,
+    
   },
   menuButton: {
     alignItems: 'center',
@@ -389,7 +355,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginBottom: 5,
+    top:-80,
   },
   
- 
-});
+
+  topMenu: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    backgroundColor: 'rgb(86, 173, 234)',
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+  },
+  
+  scanButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 30,
+    padding: 10,
+  },
+  
+  
+}); 
