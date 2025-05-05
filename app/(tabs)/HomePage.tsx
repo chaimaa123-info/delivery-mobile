@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { useTourStore } from '../../store/useTourStore';
-import { usePathname } from 'expo-router';
-import { Alert } from 'react-native';
 
 export default function HomePage() {
   const router = useRouter();
@@ -46,6 +44,9 @@ export default function HomePage() {
       )}
 
       <View style={styles.historiqueContainer}>
+      <Text style={styles.infoText}>N° Expédition :</Text>
+      <Text style={styles.infoText}>Nbr de colis à récupérer :</Text>
+      <Text style={styles.infoText}>Nbr de colis à livrer :</Text>
         <Text style={styles.sectionTitle}>Historique des colis :</Text>
         {allColis.length > 0 ? (
           <ScrollView contentContainerStyle={styles.historiqueList}>
@@ -75,7 +76,7 @@ export default function HomePage() {
           <Text style={styles.codeItem}>Aucun colis scanné.</Text>
         )}
       </View>
-
+      
       <Modal
   transparent
   visible={showOptions}
@@ -224,7 +225,7 @@ export default function HomePage() {
     </Text>
   </TouchableOpacity>
 </View>
-</View>  
+</View>
 
   );
 }
@@ -362,7 +363,6 @@ const styles = StyleSheet.create({
   bottomMenu: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    //backgroundColor: '#f1f1f1',
     backgroundColor: 'rgb(86, 173, 234)',
     paddingVertical: 10,
   },
@@ -385,4 +385,11 @@ const styles = StyleSheet.create({
     color: '#007AFF',
   },
   
+  infoText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 5,
+  },
+  
+ 
 });
