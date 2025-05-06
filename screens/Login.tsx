@@ -1,17 +1,18 @@
 // screens/Login.tsx
-import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, Image, Dimensions, Animated, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { styles, logoStyles } from '../components/styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, Dimensions, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { logoStyles, styles } from '../components/styles';
+import { useAuth } from '../context/AuthContext';
 
 const themeColors = {
-  bg: '#007AFF',
-};   
+  bg: '#007AFF',};   
 
 const screenHeight = Dimensions.get('window').height;
 
-const Login = () => {  
+const Login =  ()  => {  
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -20,18 +21,73 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current; // Ajout pour fondu
-   
+  const { token, setToken, userName, setUserName } = useAuth();
 
-  const handleLogin = () => {
-    if (!identifier || !password) {
-      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
-    } else {
-      console.log('Connexion avec :', identifier, password, odooVersion);
-
-      router.replace("/(tabs)/HomePage");
+// ✅ Vérifie si token déjà présent
+  useEffect(() => {
+  const checkToken = async () => {
+    const token = await AsyncStorage.getItem('access_token');
+    if (token) {
+      router.replace('/(tabs)/HomePage');
     }
   };
+  checkToken();
+}, []);
 
+const handleLogin = async () => {
+  if (!identifier || !password) {
+    Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+
+    const odooURL =
+      odooVersion === 'Odoo v-13'
+        ? 'https://www2.sapresslogistics.ma/api/v1/auth/token/'
+        : 'https://ton-url-odoo-18.com/web/session/authenticate';
+
+    const response = await fetch(odooURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'call',
+        params: {
+          login: identifier,
+          password: password,
+        },
+      }),
+    });
+
+    const data = await response.json();
+   
+
+    if (data.result && data.result.access_token) {
+      const accessToken = data.result.access_token;
+      const userName = data.result.user_name;
+
+      // ✅ Stocke dans AsyncStorage
+      await AsyncStorage.setItem('access_token', accessToken);
+      await AsyncStorage.setItem('user_name', userName);
+
+      setToken(accessToken);
+      setUserName(userName);
+
+      router.replace('/(tabs)/HomePage');
+    } else {
+      Alert.alert('Erreur', 'Email ou mot de passe incorrect.');
+    }
+  } catch (error) {
+    console.error('Erreur lors de la connexion :', error);
+    Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion.');
+  } finally {
+    setIsLoading(false);
+  }
+};
   const animateButton = () => {
     Animated.parallel([
       Animated.sequence([
@@ -191,10 +247,7 @@ const Login = () => {
             </View>
           </View>
 
-          {/* Mot de passe oublié */}
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={[styles.forgotText, { color: "black" }]}>Mot de passe oublié ?</Text>
-          </TouchableOpacity>
+        
 
           {/* Bouton animé */}
           <Animated.View style={{ transform: [{ scale: scaleAnim }], opacity: opacityAnim, marginTop: 20 }}>
@@ -214,7 +267,7 @@ const Login = () => {
             </TouchableOpacity>
           </Animated.View>
 
-        </View>
+        </View>  
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   },
   loginText: {  
     color: '#fff',
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '600',
   },
 
@@ -231,3 +231,4 @@ const logoStyles = StyleSheet.create({
 
 // Export des deux objets de style
 export { logoStyles, styles };
+
