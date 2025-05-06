@@ -1,3 +1,4 @@
+
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -15,6 +16,8 @@ export default function HomePage() {
   const pathname = usePathname();
   const [selectedColisIndex, setSelectedColisIndex] = useState<number | null>(null);
   const [showOptions, setShowOptions] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false); // Pour afficher la liste déroulante
+  
 
   const allColis = [...historique.flat(), ...colis];
 
@@ -36,14 +39,47 @@ export default function HomePage() {
       {/* Menu supérieur avec le bouton de scan */}
       <View style={styles.topMenu}>
         <Text style={styles.headerTitle}>Historique des Colis</Text>
-        <TouchableOpacity onPress={() => router.push('/ScanPage')} style={styles.scanButton}>
-          <View style={styles.squareTopLeft} />
-          <View style={styles.squareTopRight} />
-          <View style={styles.squareBottomLeft} />
-          <View style={styles.squareBottomRight} />
-          <Ionicons name="scan" size={30} color="white" />
-        </TouchableOpacity>
+        <TouchableOpacity
+  onPress={() => setShowDropdown(!showDropdown)}
+  style={styles.scanButton}
+>
+  <View style={styles.squareTopLeft} />
+  <View style={styles.squareTopRight} />
+  <View style={styles.squareBottomLeft} />
+  <View style={styles.squareBottomRight} />
+  <Ionicons name="scan" size={30} color="white" />
+</TouchableOpacity>
+
+
+
+{showDropdown&& (
+  <View style={styles.dropdownContainer}>
+    <TouchableOpacity
+      onPress={() => {
+        setShowDropdown(false);
+        router.push('/ScanPage'); // Redirection vers page Scan
+      }}
+      style={styles.dropdownItem}
+    >
+      <Text style={styles.dropdownText}>📦 Chargement de colis</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      onPress={() => {
+        setShowDropdown(false);
+        Alert.alert('Ramassage sélectionné', 'Fonctionnalité à implémenter');
+      }}
+      style={styles.dropdownItem}
+    >
+      <Text style={styles.dropdownText}>📬 Ramassage</Text>
+    </TouchableOpacity>
+  </View>
+)}
+
       </View>
+
+
+
 
       <View style={styles.historiqueContainer}>
         <Text style={styles.infoText}>N° Expédition :</Text>
@@ -382,5 +418,33 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   
+  
+  dropdownContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    margin: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+    padding: 10,
+    marginTop: 10,
+  },
+  picker: {
+    height: 20,
+    width: '100%',
+  },
+
+  dropdownItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
+  },
   
 }); 

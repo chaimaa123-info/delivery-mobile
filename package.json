@@ -1,5 +1,5 @@
 {
-  "name": "colis1",
+  "name": "colis",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -7,12 +7,13 @@
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
+    "web": "expo start --web",  
     "lint": "expo lint"
   },
   "dependencies": {
     "@expo-google-fonts/space-mono": "^0.3.0",
     "@expo/vector-icons": "^14.1.0",
+    "@react-native-picker/picker": "^2.11.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.7",
