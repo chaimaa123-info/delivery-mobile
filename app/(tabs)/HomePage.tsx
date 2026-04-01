@@ -1,9 +1,14 @@
-
+//HomePage
+import type { Colis } from '@/store/useTourStore';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { usePathname, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { ImageBackground, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import ColisBox from '../../components/ColisBox';
 import { useTourStore } from '../../store/useTourStore';
+import { useLogout } from '../logout';
+
 
 export default function HomePage() {
   const router = useRouter();
@@ -12,180 +17,133 @@ export default function HomePage() {
   const historique = useTourStore((state) => state.historique);
   const setColis = useTourStore((state) => state.setColis);
   const setHistorique = useTourStore((state) => state.setHistorique);
-  const [pinnedColis, setPinnedColis] = useState<string[]>([]);
   const pathname = usePathname();
   const [selectedColisIndex, setSelectedColisIndex] = useState<number | null>(null);
   const [showOptions, setShowOptions] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false); // Pour afficher la liste déroulante
+  
+  const logout = useLogout();
+  
+  //const allColis = [...historique.flat(), ...colis];
+
+  const colisList = useTourStore((state) => state.colis);
+  console.log('colisList:', colisList);
+  const setMapAddresses = useTourStore((state) => state.setMapAddresses);
+ const [showMenu, setShowMenu] = useState(false);
   
 
-  const allColis = [...historique.flat(), ...colis];
-
-  const supprimerColis = (index: number) => {
-    if (index < historique.flat().length) {
-      const flatHistorique = historique.flat();
-      flatHistorique.splice(index, 1);
-      setHistorique([flatHistorique]);
-    } else {
-      const adjustedIndex = index - historique.flat().length;
-      const newColis = [...colis];
-      newColis.splice(adjustedIndex, 1);
-      setColis(newColis);
+  const handleOptionPress = (option: 'map' | 'profile') => {
+    setShowMenu(false);
+    if (option === 'map') {
+      // Récupérer toutes les adresses des colis scannés (street)
+      const addresses = colis
+        .map((c) => c.street)
+        .filter((street) => street && street.length > 0);
+      setMapAddresses(addresses);
+      router.push('/map'); // Naviguer vers la page carte
+    } else if (option === 'profile') {
+      router.push('/profile');
     }
   };
 
+  
+  
   return (
-    <View style={styles.container}>
+
+      <ImageBackground
+    source={require('../../assets/images/TMS1.png')} 
+    style={{ flex: 1, width: '100%', height: '100%' }}
+    resizeMode="cover"
+  >
+    <BlurView intensity={200} tint="light" style={{ flex: 1 }}>
+      
+      <SafeAreaView style={styles.container}
+>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+    <SafeAreaView style={styles.container}>
+      {/* StatusBar */}
+      <StatusBar barStyle="light-content" backgroundColor="rgb(110, 189, 72)" />
+
       {/* Menu supérieur avec le bouton de scan */}
       <View style={styles.topMenu}>
-        <Text style={styles.headerTitle}>Historique des Colis</Text>
         <TouchableOpacity
-  onPress={() => setShowDropdown(!showDropdown)}
-  style={styles.scanButton}
->
-  <View style={styles.squareTopLeft} />
-  <View style={styles.squareTopRight} />
-  <View style={styles.squareBottomLeft} />
-  <View style={styles.squareBottomRight} />
-  <Ionicons name="scan" size={30} color="white" />
-</TouchableOpacity>
+          onPress={() => router.push('/ScanPage')}
+          style={styles.scanButton}
+        >
+          <View style={styles.squareTopLeft} />
+          <View style={styles.squareTopRight} />
+          <View style={styles.squareBottomLeft} />
+          <View style={styles.squareBottomRight} />
+          <Ionicons name="scan" size={25} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Historique des Colis</Text>
+        
+         <TouchableOpacity onPress={() => setShowMenu(!showMenu)}  style={styles.menuButton}>
+    <Ionicons name="ellipsis-vertical" size={25} color="white" />
+  </TouchableOpacity>
+      </View>
+
+{/* Menu déroulant */}
+      {showMenu && (
+        <View style={styles.menu}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => handleOptionPress('map')}>
+            <Ionicons name="map-outline" size={20} color="black" style={styles.icon} />
+            <Text style={styles.menuText}>Voir la carte</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => handleOptionPress('profile')}>
+            <Ionicons name="person-outline" size={20} color="black" style={styles.icon} />
+            <Text style={styles.menuText}>Mon profil</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
 
+      <View style={styles.historiqueContainer}>
+        <Text style={styles.infoText}>
+  N° Expédition : <Text style={{ fontWeight: 'bold' }}>BATCH/60671</Text>
+</Text>
 
-{showDropdown&& (
-  <View style={styles.dropdownContainer}>
-    <TouchableOpacity
-      onPress={() => {
-        setShowDropdown(false);
-        router.push('/ScanPage'); // Redirection vers page Scan
-      }}
-      style={styles.dropdownItem}
-    >
-      <Text style={styles.dropdownText}>📦 Chargement de colis</Text>
-    </TouchableOpacity>
+        <Text style={styles.infoText}>
+  Nbr de colis à livrer : <Text style={{ fontWeight: 'bold' }}> {colisList.length}</Text>
+ 
+</Text>
 
-    <TouchableOpacity
-      onPress={() => {
-        setShowDropdown(false);
-        Alert.alert('Ramassage sélectionné', 'Fonctionnalité à implémenter');
-      }}
-      style={styles.dropdownItem}
-    >
-      <Text style={styles.dropdownText}>📬 Ramassage</Text>
-    </TouchableOpacity>
-  </View>
+
+       {colisList.length > 0 ? (
+  <ScrollView contentContainerStyle={styles.historiqueList}>
+    {colisList.map((colis: Colis, index: number) => {
+      // Choix de la clé unique : id, sinon code, sinon index
+      const uniqueId = colis.id ?? colis.code ?? index;
+      const idStr = uniqueId != null ? uniqueId.toString() : '';
+
+      return (
+        <TouchableOpacity
+          key={idStr}
+          onPress={() => {
+            if (idStr) {
+              router.push({
+                pathname: '/details',
+                params: { id: idStr },
+              });
+            } else {
+              console.warn('ID manquant pour la navigation', colis);
+            }
+          }}
+        >
+          <ColisBox colis={colis} />
+        </TouchableOpacity>
+      );
+    })}
+  </ScrollView>
+) : (
+  <Text style={styles.codeItem}>Aucun colis scanné.</Text>
 )}
 
       </View>
 
+      
 
-
-
-      <View style={styles.historiqueContainer}>
-        <Text style={styles.infoText}>N° Expédition :</Text>
-        <Text style={styles.infoText}>Nbr de colis à récupérer :</Text>
-        <Text style={styles.infoText}>Nbr de colis à livrer :</Text>
-
-        {allColis.length > 0 ? (
-          <ScrollView contentContainerStyle={styles.historiqueList}>
-            {allColis.map((code, index) => (
-              <TouchableOpacity
-                key={index}
-                onLongPress={() => {
-                  setSelectedColisIndex(index);
-                  setShowOptions(true);
-                }}
-              >
-                <View style={[styles.colisBox, pinnedColis.includes(code) && { backgroundColor: '#fff8dc' }]}>
-                  <Text style={styles.colisTitle}>
-                    Colis {index + 1}
-                    {pinnedColis.includes(code) && <Text> 📌</Text>}
-                    :
-                  </Text>
-                  <Text style={styles.codeText}>{code}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        ) : (
-          <Text style={styles.codeItem}>Aucun colis scanné.</Text>
-        )}
-      </View>
-
-      <Modal
-        transparent
-        visible={showOptions}
-        animationType="slide"
-        onRequestClose={() => setShowOptions(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setShowOptions(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.bottomSheet}>
-              <View style={styles.handleBar} />
-              {selectedColisIndex !== null && (() => {
-                const updatedAllColis = [...historique.flat(), ...colis];
-                const colisCode = updatedAllColis[selectedColisIndex];
-                const isPinned = pinnedColis.includes(colisCode);
-
-                return (
-                  <>
-                    <Text style={styles.modalColisTitle}>
-                      📦 Colis sélectionné : {colisCode}
-                    </Text>
-
-                    {/* Épingler / Désépingler */}
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (isPinned) {
-                          setPinnedColis((prev) => prev.filter((c) => c !== colisCode));
-                        } else {
-                          updatedAllColis.splice(selectedColisIndex, 1);
-                          updatedAllColis.unshift(colisCode);
-                          setColis(updatedAllColis);
-                          setHistorique([]);
-                          setPinnedColis((prev) => [...new Set([colisCode, ...prev])]);
-                        }
-                        setShowOptions(false);
-                      }}
-                    >
-                      <Text style={styles.sheetOption}>
-                        {isPinned ? '❌ Désépingler' : '📌 Épingler'}
-                      </Text>
-                    </TouchableOpacity>
-
-                    {/* Supprimer */}
-                    <TouchableOpacity
-                      onPress={() => {
-                        Alert.alert(
-                          'Confirmation',
-                          'Voulez-vous vraiment supprimer ce colis ?',
-                          [
-                            {
-                              text: 'Annuler',
-                              style: 'cancel',
-                            },
-                            {
-                              text: 'Supprimer',
-                              style: 'destructive',
-                              onPress: () => {
-                                supprimerColis(selectedColisIndex);
-                                setShowOptions(false);
-                              },
-                            },
-                          ],
-                          { cancelable: true }
-                        );
-                      }}
-                    >
-                      <Text style={styles.sheetOption}>🗑️ Supprimer</Text>
-                    </TouchableOpacity>
-                  </>
-                );
-              })()}
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+     
 
       {/* Menu en bas de page */}
       <View style={styles.bottomMenu}>
@@ -193,7 +151,11 @@ export default function HomePage() {
           style={[styles.menuButton, pathname === '/HomePage' && styles.activeButton]}
           onPress={() => router.push('/HomePage')}
         >
-          <Ionicons name="home" size={24} color={pathname === '/HomePage' ? '#007AFF' : 'black'} />
+          <Ionicons
+            name="home" 
+            size={24} 
+            color={pathname === '/HomePage' ? 'white' : 'white'} 
+          />
           <Text style={[styles.menuButtonText, pathname === '/HomePage' && styles.activeText]}>
             Accueil
           </Text>
@@ -202,41 +164,45 @@ export default function HomePage() {
         <TouchableOpacity
           style={[styles.menuButton, pathname === '/search' && styles.activeButton]}
           onPress={() => router.push('/search')}
-        >
-          <Ionicons name="search" size={24} color={pathname === '/search' ? '#007AFF' : 'black'} />
+        >   
+          <Ionicons name="search" size={24} color={pathname === '/search' ? 'white' : 'white'} />
           <Text style={[styles.menuButtonText, pathname === '/search' && styles.activeText]}>
             Recherche
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.menuButton, pathname === '/historique' && styles.activeButton]}
-          onPress={() => router.push('/historique')}
+          style={[styles.menuButton, pathname === '/versement' && styles.activeButton]}
+          onPress={() => router.push('/versement')}
         >
-          <Ionicons name="time" size={24} color={pathname === '/historique' ? '#007AFF' : 'black'} />
-          <Text style={[styles.menuButtonText, pathname === '/historique' && styles.activeText]}>
-            L'historique
+          <Ionicons name="cash-outline" size={24} color={pathname === '/versement' ? 'white' : 'white'} />
+          <Text style={[styles.menuButtonText, pathname === '/versement' && styles.activeText]}>
+            Versement
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.menuButton, pathname === '../login' && styles.activeButton]}
-          onPress={() => router.replace('../login')}
+          style={[styles.menuButton, pathname === '../logout' && styles.activeButton]}
+          onPress={logout}
         >
-          <Ionicons name="arrow-back" size={24} color={pathname === '../login' ? '#007AFF' : 'black'} />
-          <Text style={[styles.menuButtonText, pathname === '../login' && styles.activeText]}>
+          <Ionicons name="log-out-outline" size={24} color={pathname === '../logout' ? 'white' : 'white'} />
+          <Text style={[styles.menuButtonText, pathname === '../logout' && styles.activeText]}>
             Retour
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
+    </SafeAreaView>
+      </BlurView>
+  </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 20,
+    backgroundColor: 'transparent',
+   paddingTop: 10,
     position: 'relative',
   },
   startScanButton: {
@@ -245,8 +211,7 @@ const styles = StyleSheet.create({
     right: 20,
     width: 60,
     height: 60,
-    //backgroundColor: '#007AFF',
-    backgroundColor: 'rgb(86, 173, 234)',
+    backgroundColor: 'rgb(3, 107, 21)',
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
@@ -258,32 +223,32 @@ const styles = StyleSheet.create({
   },
   squareTopLeft: {
     position: 'absolute',
-    top: 19,
-    left: 19,
+    top: 17,
+    left: 17,
     width: 5,
     height: 5,
     backgroundColor: 'white',
   },
   squareTopRight: {
     position: 'absolute',
-    top: 19,
-    right: 19,
+    top: 17,
+    right: 17,
     width: 5,
     height: 5,
     backgroundColor: 'white',
   },
   squareBottomLeft: {
     position: 'absolute',
-    bottom: 19,
-    left: 19,
+    bottom: 17,
+    left: 17,
     width: 5,
     height: 5,
     backgroundColor: 'white',
   },
   squareBottomRight: {
     position: 'absolute',
-    bottom: 19,
-    right: 19,
+    bottom: 17,
+    right: 17,
     width: 5,
     height: 5,
     backgroundColor: 'white',
@@ -319,39 +284,9 @@ const styles = StyleSheet.create({
   codeItem: {
     fontSize: 16,
     fontStyle: 'italic',
-    color: '#888',
+    color: 'dark',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'flex-end',
-  },
-  bottomSheet: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  bottomSheetTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  sheetOption: {
-    fontSize: 18,
-    paddingVertical: 39,
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-  },
-
-  modalColisTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    //textAlign: 'center',
-    marginBottom: 15,
-    color: '#333',
-  },
+  
   
   handleBar: {
     width: 40,
@@ -364,16 +299,18 @@ const styles = StyleSheet.create({
   bottomMenu: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: 'rgb(86, 173, 234)',
-    paddingVertical: 10,
+    backgroundColor: 'rgb(110, 189, 72)',
+    paddingVertical: 20,
     
   },
   menuButton: {
     alignItems: 'center',
+    top:-10,
+
   },
   menuButtonText: { 
     fontSize: 12,
-    color: '#333',
+    color: 'white',
   },
 
   activeButton: {
@@ -384,7 +321,7 @@ const styles = StyleSheet.create({
   
   activeText: {
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: 'white',
   },
   
   infoText: {
@@ -392,6 +329,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 5,
     top:-80,
+    
   },
   
 
@@ -399,52 +337,83 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between', 
     alignItems: 'center',
-    backgroundColor: 'rgb(86, 173, 234)',
+    backgroundColor: 'rgb(110, 189, 72)',
     paddingTop: 20,
     paddingHorizontal: 20,
     paddingBottom: 10,
   },
   
   headerTitle: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'center',
   },
   
   scanButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: 'green',
     borderRadius: 30,
     padding: 10,
   },
   
   
-  dropdownContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    margin: 10,
+  
+  eyeButton: {
+    position: 'absolute',
+    bottom: 100, 
+    right: 20,
+    backgroundColor: 'rgb(110, 189, 72)',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
-    padding: 10,
-    marginTop: 10,
-  },
-  picker: {
-    height: 20,
-    width: '100%',
   },
 
-  dropdownItem: {
-    paddingVertical: 10,
+ 
+  listContainer: {
+    padding: 20,
+  },
+  noColisText: {
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 18,
+    color: '#888',
+  },
+
+
+
+  menu: {
+    position: 'absolute',
+    top: 50, // ajuste selon ta hauteur de header
+    right: 15,
+    backgroundColor: 'white',
+    borderRadius: 6,
+    elevation: 5, // ombre android
+    shadowColor: '#000', // ombre ios
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 1000,
+    width: 150,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#eee',
   },
-  
-  dropdownText: {
+  icon: {
+    marginRight: 10,
+  },
+  menuText: {
     fontSize: 16,
-    color: '#333',
   },
-  
+
 }); 

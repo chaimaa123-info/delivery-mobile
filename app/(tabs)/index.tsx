@@ -1,5 +1,6 @@
-import { Tabs } from 'expo-router';
+//app/index 
 import { MaterialIcons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 
 export default function TabsLayout() {
   return (
@@ -11,7 +12,7 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: '#f8fafc',
         },
-      }}
+      }} 
     >
       <Tabs.Screen
         name="login"

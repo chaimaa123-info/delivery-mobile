@@ -40,35 +40,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
   },
-  forgotPassword: {
-    alignItems: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotText: {
-    color: '#007AFF',
-    textDecorationLine: 'underline',
-  },
+ 
+  
+  
   loginButton: {
     backgroundColor: '#007AFF',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 30,
     alignItems: 'center',
   },
   loginText: {  
     color: '#fff',
-    fontSize: 19,
+    fontSize: 15,
     fontWeight: '600',
   },
 
 
 inputGroup: {
-    marginBottom: 16,
+    marginBottom: 18,
   },
   label: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
-    color: '#333',
-    marginBottom: 4,
+    color: 'white',
+    marginBottom: 1,
   },
 
   inputWithIcon: { 
@@ -78,9 +73,9 @@ inputGroup: {
     borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: 'tranparent',
     height: 50,
-    shadowColor: "#000",
+    shadowColor: "transparent",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -91,8 +86,10 @@ inputGroup: {
     marginRight: 8,
   },
   inputField: {  
-    flex: 1,
+    flex: 2,
     height: 50,
+    backgroundColor: 'transparent', 
+    fontWeight: 'bold',
    
   }, 
 
@@ -111,7 +108,7 @@ selectButton: {
   
   versionBar: {
     position: 'absolute',
-    top: 40, 
+    top: 10, 
     right: 10,
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -217,15 +214,16 @@ const logoStyles = StyleSheet.create({
   scrollContainer: {
     paddingTop: 10,
   },
-  logoContainer: {
-    alignItems: 'center', 
-    marginBottom: 2,
-    marginTop: 0,
+   logoContainer: {
+    alignItems: 'flex-start',  // place le contenu à gauche
+    marginBottom: 10,          // espace en bas pour séparer du reste
+    marginTop: 30,             // espace en haut
+    paddingLeft: 10,           // un peu de marge à gauche
   },
   logoImage: {
-    width: 300, 
-    height: 200,
-    marginTop: 10,
+    width: 80,    // plus petit que 200
+    height: 80,
+    resizeMode: 'contain', // pour garder les proportions sans couper
   },
 });
 

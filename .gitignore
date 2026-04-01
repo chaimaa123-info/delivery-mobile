@@ -37,3 +37,11 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+node_modules/
+*.log
+.DS_Store
+build/
+android/
+ios/
+.env

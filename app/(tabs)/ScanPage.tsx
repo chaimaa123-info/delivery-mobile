@@ -1,15 +1,18 @@
 // ScanPage.tsx
+import { useTourStore } from '@/store/useTourStore';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
 import { Audio } from 'expo-av';
+import type { BarcodeScanningResult } from 'expo-camera';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Button, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useTourStore } from '../../store/useTourStore';
 const { width } = Dimensions.get('window');
 
 
-export default function ScanPage() {  
+export default function ScanPage({ searchParams }: { searchParams: { mode?: string } }){     
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(true);
@@ -26,13 +29,39 @@ export default function ScanPage() {
   const cornersAnimationRef = useRef<Animated.CompositeAnimation | null>(null);
   const [showRedOverlay, setShowRedOverlay] = useState(false);   
   const router = useRouter();
-  const { addColis } = useTourStore();
-
-  const frameHeight = 200; // Hauteur du cadre de scan 
- 
+  const isFocused = useIsFocused(); // Ajoute ce hook
   
+  const [scannedColis, setScannedColis] = useState<any[]>([]); // tableau temporaire
+  const frameHeight = 200; // Hauteur du cadre de scan
+
+const { id } = useLocalSearchParams<{ id: string }>();
+ const setRescannedCode = useTourStore(state => state.setRescannedCode);
+ 
+ const { mode } = useLocalSearchParams<{ mode?: string }>();
+  console.log('Mode:', mode);
+
+
+async function onBarCodeScanned(event: BarcodeScanningResult) {
+  if (scanCooldown) return;
+  setScanCooldown(true);
+
+  const barcode = event.data; // c’est ici qu’est le code-barres
+  setRescannedCode(id, barcode);
+
+ // Attends 500ms pour être sûr que le store est bien mis à jour
+  setTimeout(() => {
+    router.back(); // Ne pas quitter immédiatement
+  }, 500);
+
+  // Cooldown réactivé après un moment
+  setTimeout(() => {
+    setScanCooldown(false);
+  }, 1000);
+}
+
+
   useEffect(() => {   
-    if (isScanning) {
+    if (isFocused && isScanning) {
       lineAnimationRef.current = Animated.loop(
         Animated.sequence([
         Animated.timing(linePosition, { 
@@ -54,7 +83,7 @@ export default function ScanPage() {
       linePosition.setValue(0);
       scaleValue.setValue(1);
     }
-  }, [isScanning]);
+  }, [isFocused, isScanning]);
 
   useEffect(() => {
     const loadSounds = async () => {
@@ -74,7 +103,7 @@ export default function ScanPage() {
   useEffect(() => {
     if (scannedCodes.length > 0) {
       setTimeout(() => { scrollViewRef.current?.scrollToEnd({ animated: true });
-     }, 200);
+     }, 100);
     }
   }, [scannedCodes]);
 
@@ -88,62 +117,120 @@ export default function ScanPage() {
     );   
   }
 
-  async function handleBarCodeScanned({ data }: { data: string }) {
-    if (scanCooldown) return;
+async function handleBarCodeScanned({ data }: { data: string }) {
+  if (scanCooldown) return;
+  setScanCooldown(true);
 
-    setScanCooldown(true);
+  try {
+    const accessToken = await AsyncStorage.getItem('access_token');
+    if (!accessToken) throw new Error('Token manquant');
 
+    const response = await fetch(`https://www2.sapresslogistics.ma/api/mobile/v1/colis/${data}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Erreur API:', errorText);
+      throw new Error('Colis introuvable');
+    }
+
+    const colisData = await response.json();
+
+    // Si on est en mode rescanner, on stocke et on redirige
+    if (mode === 'rescanner') {
+      setRescannedCode(id, data);
+      router.back();  // ← redirige vers la page d'origine
+      return; // on sort ici pour éviter le reste du code
+    }
+
+    // Mode normal
     if (scannedCodes.includes(data)) {
       setErrorMessage('Ce colis a déjà été scanné !');
       setShowRedOverlay(true);
-
-      // Joue le son d'erreur
-    if (errorSound) await errorSound.replayAsync();
-
+      if (errorSound) await errorSound.replayAsync();
       setTimeout(() => {
         setErrorMessage('');
         setShowRedOverlay(false);
       }, 1000);
     } else {
       setScannedCodes((prev) => [...prev, data]);
-      addColis(data);
+      setScannedColis((prev) => [...prev, colisData]);
       if (sound) await sound.replayAsync();
-      setTimeout(() => { scrollViewRef.current?.scrollToEnd({ animated: true });
-     }, 200);
     }
-
-    setTimeout(() => { setScanCooldown(false); }, 1000);
+  } catch (error) {
+    console.error("Erreur:", error);
+    setErrorMessage('Colis introuvable');
+    setShowRedOverlay(true);
+    if (errorSound) await errorSound.replayAsync();
+    setTimeout(() => {
+      setErrorMessage('');
+      setShowRedOverlay(false);
+    }, 2000);
+  } finally {
+    setTimeout(() => {
+      setScanCooldown(false);
+    }, 2000);
   }
+}
+
+function handleValider() {
+  if (scannedColis.length === 0) return; // rien à valider
+
+  // Ajouter les colis scannés au store global
+  scannedColis.forEach(colis => {
+    useTourStore.getState().addColis(colis);
+  });
+
+  // Vider la liste locale pour faire disparaître les colis scannés immédiatement
+  setScannedCodes([]);
+  setScannedColis([]);
+
+  // Naviguer vers la page d'accueil (HomePage)
+  router.replace('/HomePage');
+}
+
 
   function handleDeleteCode(index: number) {
     setScannedCodes((prev) => prev.filter((_, i) => i !== index));
   }
-  function validateTour() {
-    if (scannedCodes.length > 0) {
+  const validateTour = async () => {
+  if (scannedCodes.length > 0) {
+    Alert.alert(
+      "Validation de la tournée",
+      "La tournée a été validée avec succès.",
+      [
+        {
+          text: "OK",
+          onPress: async () => {
+            const addColis = useTourStore.getState().addColis;
 
-      // Afficher l'alerte
-      Alert.alert(
-        "Validation de la tournée",
-        "La tournée a été validée avec succès.",
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              // Réinitialiser la liste des colis dans le store
-              useTourStore.getState().validerTournee(); // ➜ enregistre dans l’historique + vide la liste
-              
-              // Réinitialiser l'état local des colis
-              setScannedCodes([]); // Réinitialisation de la liste des colis
-  
-              // Rediriger vers la page d'accueil
-              //router.replace("/HomePage");
-            }, 
+            // Ajouter les colis scannés au store
+            scannedColis.forEach((colis) => {
+              addColis(colis);
+            });
+
+            // Réinitialiser la tournée (si tu veux enregistrer dans l’historique, sinon retire cette ligne)
+            useTourStore.getState().validerTournee();
+
+            // Réinitialiser l’état local
+            setScannedCodes([]);
+            setScannedColis([]);
+
+
+            // Aller à la page d’accueil
+            router.replace('/HomePage');
           },
-        ],
-        { cancelable: false }
-      );
-    }
-  }   
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+};
+  
    
   function refuseTour() {
     if (scannedCodes.length > 0) {
@@ -195,17 +282,21 @@ export default function ScanPage() {
   }
   
  
+
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={exitScan} style={styles.exitButton}>
         <Ionicons name="close" size={30} color="white" />
       </TouchableOpacity>
  
+      {isFocused && (
       <CameraView
         style={styles.camera}
         facing={facing}
         barcodeScannerSettings={{ barcodeTypes: ['qr', 'code128', 'ean13', 'ean8'] }}
-        onBarcodeScanned={handleBarCodeScanned}
+        onBarcodeScanned={mode === 'rescanner' ? onBarCodeScanned : handleBarCodeScanned}
+
       >
         {showRedOverlay && <View style={styles.redOverlay} />}
 
@@ -257,12 +348,13 @@ export default function ScanPage() {
             <TouchableOpacity onPress={refuseTour} style={styles.refuseButton}>
               <Text style={styles.buttonText}>Refuser</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={validateTour} style={styles.validateButton}>
+            <TouchableOpacity onPress={handleValider} style={styles.validateButton}>
               <Text style={styles.buttonText}>Valider</Text>
             </TouchableOpacity>
           </View>
         )}
       </CameraView>
+      )}
     </View>
   );
 }
@@ -335,8 +427,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '51%',
     width: '100%',
-    //backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    backgroundColor: 'rgba(70, 64, 152, 0.5)',
+    backgroundColor: 'rgba(17, 152, 57, 0.5)',
     padding: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
@@ -394,7 +485,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 70,
     right: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'grey',
     padding: 10,
     borderRadius: 30,
     zIndex: 999,

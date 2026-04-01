@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -18,10 +19,10 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  useEffect(() => {
+  useEffect(() => {  
     if (loaded) {
-      SplashScreen.hideAsync();
-    }
+      SplashScreen.hideAsync(); // Cache la Splash Screen une fois les polices chargées.
+    } 
   }, [loaded]);
 
   if (!loaded) {
@@ -30,12 +31,16 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-       <AuthProvider> {/* <--- Fournit le contexte d'auth à toute l'app */}
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
+      <AuthProvider>
+        <Stack>
+          {/* La première page est SplashScreen, qui redirigera vers login */}
+          <Stack.Screen name="SplashScreen" options={{ headerShown: false }} />
+         <Stack.Screen name="login"  options={{ headerShown: false }} />
+         <Stack.Screen name="map"  options={{ headerShown: false }} />
+         <Stack.Screen name="(tabs)"  options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
       </AuthProvider>
     </ThemeProvider>
   );

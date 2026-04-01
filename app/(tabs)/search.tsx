@@ -1,61 +1,104 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { usePathname } from 'expo-router';
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { BackHandler } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { usePathname, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  BackHandler,
+  ImageBackground,
+  KeyboardAvoidingView, Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useTourStore } from '../../store/useTourStore';
+import { useLogout } from '../logout';
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
   const router = useRouter();
+  const logout = useLogout();
 
-  // Fonction pour simuler une recherche
-  const handleSearch = () => {
-    console.log('Recherche en cours pour:', searchQuery);
-    // Tu pourrais ici ajouter de la logique pour effectuer la recherche
-  };
+  const colisList = useTourStore((state) => state.colis);
+
+  // Filtrage dynamique selon la recherche
+  const filteredResults = searchQuery
+    ? colisList.filter(colis =>
+        colis.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        colis.barcode.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   useEffect(() => {
     const backAction = () => {
       router.push('/HomePage');
-      return true; // empêche le comportement par défaut
+      return true;
     };
-  
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-  
-    return () => backHandler.remove(); // nettoyage à la sortie
+    return () => backHandler.remove();
   }, []);
-  
+
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Titre de la page de recherche */}
-        <Text style={styles.title}>Recherche</Text>
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
+    keyboardVerticalOffset={0}
+  >
+    <ImageBackground
+        source={require('../../assets/images/TMS1.png')} 
+        style={{ flex: 1, width: '100%', height: '100%' }}
+        resizeMode="cover"
+      >
+        <BlurView intensity={200} tint="light" style={{ flex: 1 }}>
 
-        {/* Champ de recherche */}
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Rechercher..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        
-        {/* Bouton de recherche */}
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>Lancer la Recherche</Text>
-        </TouchableOpacity>
+    <View style={styles.container}> 
+      {/* Menu supérieur avec recherche */}
+      <View style={styles.topMenu}>
+        <TouchableOpacity onPress={logout}></TouchableOpacity>
+        <View style={styles.searchBar}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="N° Colis"
+            placeholderTextColor="grey"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          <TouchableOpacity onPress={() => {}} style={styles.searchCircle}>
+            <Ionicons name="search" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-        {/* Affichage des résultats de la recherche (Exemple statique) */}
+   <ScrollView contentContainerStyle={[styles.scrollContainer, { paddingBottom: 900 }]}>
+
         {searchQuery ? (
-          <View style={styles.results}>
-            <Text style={styles.resultsText}>Résultats pour "{searchQuery}":</Text>
-            {/* Remplace ce texte par des résultats dynamiques */}
-            <Text style={styles.resultsText}>Résultat 1</Text>
-            <Text style={styles.resultsText}>Résultat 2</Text>
-            <Text style={styles.resultsText}>Résultat 3</Text>
-          </View>
+          filteredResults.length > 0 ? (
+            filteredResults.map((colis, index) => (
+              <View key={index} style={styles.resultItem}>
+                 <Text style={styles.resultsText}>
+    <Text style={{ fontWeight: 'bold' }}>N° Colis : </Text>{colis.code}
+  </Text>
+  <Text style={styles.resultsText}>
+    <Text style={{ fontWeight: 'bold' }}>N° Demande : </Text>{colis.demande}
+  </Text>
+  <Text style={styles.resultsText}>
+    <Text style={{ fontWeight: 'bold' }}>Expéditeur : </Text>{colis.expediteur}
+  </Text>
+  <Text style={styles.resultsText}>
+    <Text style={{ fontWeight: 'bold' }}>Destinataire : </Text>{colis.destinatairee}
+  </Text>
+  <Text style={styles.resultsText}>
+    <Text style={{ fontWeight: 'bold' }}>Adresse : </Text>{colis.street}
+  </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noResults}>Aucun résultat pour "{searchQuery}".</Text>
+          )
         ) : null}
       </ScrollView>
 
@@ -65,7 +108,7 @@ export default function SearchScreen() {
           style={[styles.menuButton, pathname === '/HomePage' && styles.activeButton]}
           onPress={() => router.push('/HomePage')}
         >
-          <Ionicons name="home" size={24} color={pathname === '/HomePage' ? '#007AFF' : 'black'} />
+          <Ionicons name="home" size={24} color="white" />
           <Text style={[styles.menuButtonText, pathname === '/HomePage' && styles.activeText]}>Accueil</Text>
         </TouchableOpacity>
 
@@ -73,83 +116,102 @@ export default function SearchScreen() {
           style={[styles.menuButton, pathname === '/search' && styles.activeButton]}
           onPress={() => router.push('/search')}
         >
-          <Ionicons name="search" size={24} color={pathname === '/search' ? '#007AFF' : 'black'} />
+          <Ionicons name="search" size={24} color="white" />
           <Text style={[styles.menuButtonText, pathname === '/search' && styles.activeText]}>Recherche</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.menuButton, pathname === '/historique' && styles.activeButton]}
-          onPress={() => router.push('/historique')}
+          style={[styles.menuButton, pathname === '/versement' && styles.activeButton]}
+          onPress={() => router.push('/versement')}
         >
-          <Ionicons name="time" size={24} color={pathname === '/historique' ? '#007AFF' : 'black'} />
-          <Text style={[styles.menuButtonText, pathname === '/historique' && styles.activeText]}>L'historique</Text>
+          <Ionicons name="cash-outline" size={24} color="white" />
+          <Text style={[styles.menuButtonText, pathname === '/versement' && styles.activeText]}>Versement</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.menuButton, pathname === '../login' && styles.activeButton]}
-          onPress={() => router.replace('../login')}
+          style={[styles.menuButton, pathname === '../logout' && styles.activeButton]}
+          onPress={logout}
         >
-          <Ionicons name="arrow-back" size={24} color={pathname === '../login' ? '#007AFF' : 'black'} />
-          <Text style={[styles.menuButtonText, pathname === '../login' && styles.activeText]}>Retour</Text>
+          <Ionicons name="log-out-outline" size={24} color="white" />
+          <Text style={[styles.menuButtonText, pathname === '../logout' && styles.activeText]}>Retour</Text>
         </TouchableOpacity>
       </View>
     </View>
+       </BlurView>
+      </ImageBackground>
+      </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#1e40af',
-  },
-  searchInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-  },
-  searchButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 10,
-    borderRadius: 8,
+  container: { flex: 1 },
+  topMenu: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgb(110, 189, 72)',
+    paddingTop: 50,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    justifyContent: 'space-between',
   },
-  searchButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 22,
+    marginLeft: 5,
+    height: 55,
+    paddingHorizontal: 10,
   },
-  results: {
-    marginTop: 20,
+  searchInput: { flex: 1, color: 'black' },
+  searchCircle: {
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+    backgroundColor: 'rgb(110, 189, 72)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  scrollContainer: { flexGrow: 1, padding: 20 },
+  resultItem: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    elevation: 2,
   },
   resultsText: {
     fontSize: 16,
     color: '#333',
-    marginVertical: 5,
+  },
+  noResults: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#888',
   },
   bottomMenu: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'rgb(86, 173, 234)',
-    paddingVertical: 10,
+     flexDirection: 'row',
+  justifyContent: 'space-around',
+  backgroundColor: 'rgb(110, 189, 72)',
+  paddingVertical: 20,
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 0,
+  // Optionnel : élévation pour rester au-dessus
+  elevation: 10,
+  zIndex: 10,
+    
   },
   menuButton: {
     alignItems: 'center',
+    top:-10,
   },
   menuButtonText: {
     fontSize: 12,
-    color: '#333',
+    color: 'white',
   },
   activeButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
@@ -158,6 +220,6 @@ const styles = StyleSheet.create({
   },
   activeText: {
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: 'white',
   },
 });

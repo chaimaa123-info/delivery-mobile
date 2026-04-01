@@ -1,10 +1,12 @@
+
+//context/AuthContext  
 import React, { createContext, useContext, useState } from 'react';
 
 interface AuthContextType {
   token: string | null;
-  setToken: (token: string) => void;
+  setToken: (token: string | null) => void; 
   userName: string | null;
-  setUserName: (name: string) => void;
+  setUserName: (name: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({

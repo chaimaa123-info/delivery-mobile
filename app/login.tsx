@@ -1,6 +1,6 @@
 // app/login.tsx
 import { Stack } from 'expo-router';
-import LoginScreen  from '../screens/Login';
+import LoginScreen from '../screens/Login';
 //export default function Login() {
     //return <LoginScreen />;
 //} 
@@ -13,7 +13,7 @@ export default function Login() {
           headerShown: false, // ← Désactive complètement le header
           title: '' // ← Optionnel: efface le titre
         }} />
-        <LoginScreen />
+        <LoginScreen/>
       </>
     );
   }   

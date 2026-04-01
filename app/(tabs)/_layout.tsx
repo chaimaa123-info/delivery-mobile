@@ -1,3 +1,4 @@
+
 // app/tabs/layout.tsx
 import { MaterialIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
@@ -12,18 +13,10 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen
-        name="login"
-        options={{
-          title: 'Login',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="login" size={24} color={color} />
-          ),
-        }}
-      />
+      
       {/* Tu peux ajouter d'autres pages ici sans afficher les onglets */}
       <Tabs.Screen
-        name="home"
+        name="HomePage"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => (
@@ -31,10 +24,12 @@ export default function TabsLayout() {
           ),
         }}
       />
+      
+
       <Tabs.Screen
-        name="historique"  
+        name="versement"  
         options={{
-          title: 'Historique',
+          title: 'Versement',
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="history" size={24} color={color} />
           ),
@@ -43,3 +38,4 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+ 
