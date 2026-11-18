@@ -136,15 +136,7 @@ Tableau de bord analytique.
 
 Mode hors ligne.
 
-🤝 Contribution
-Les contributions sont les bienvenues.
-Si vous souhaitez améliorer ce projet :
 
-Forkez le dépôt.
-
-Créez une branche dédiée.
-
-Proposez vos modifications via une Pull Request.
 
 📄 Licence
 Ce projet est développé dans un cadre académique.
