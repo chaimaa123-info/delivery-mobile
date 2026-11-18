@@ -1,244 +1,155 @@
-# 📦 Delivery Management Mobile App
+📦 Delivery Management Mobile App
+Application mobile de gestion de livraison de colis développée dans le cadre d’un Projet de Fin d’Études (PFE).
+Elle permet aux livreurs de consulter leurs tournées, suivre les colis à livrer et mettre à jour le statut des livraisons, avec une intégration à Odoo ERP via API REST.
 
-![React Native](https://img.shields.io/badge/React%20Native-0.73-61DAFB?style=flat-square&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?style=flat-square&logo=javascript)
-![Odoo](https://img.shields.io/badge/Odoo%20ERP-16-714B67?style=flat-square&logo=odoo)
-![REST API](https://img.shields.io/badge/REST-API-009688?style=flat-square)
-![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-lightgrey?style=flat-square&logo=android)
+🚀 Fonctionnalités
+Authentification des utilisateurs (livreurs).
 
-A cross-platform **Delivery Management Mobile Application** developed as a Final Year Project (PFE) for **Sapress**, designed to digitalize and optimize the parcel delivery process through real-time tracking, route management, and seamless integration with **Odoo ERP** via REST API.
+Consultation des tournées de livraison.
 
----
+Affichage des colis à livrer.
 
-## 📋 Table of Contents
+Mise à jour du statut de livraison.
 
-- [About the Project](#about-the-project)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [App Workflow](#app-workflow)
-- [Architecture](#architecture)
-- [My Role](#my-role)
-- [Future Improvements](#future-improvements)
+Suivi en temps réel des colis via Odoo ERP.
 
----
+Communication avec l’API Odoo via REST.
 
-## 📖 About the Project
+Interface mobile compatible Android et iOS.
 
-This application was built during a **Final Year Internship (PFE)** at **Sapress, Casablanca**. The goal was to replace a manual, paper-based delivery process with a modern mobile solution that provides:
+Design simple et adapté à une utilisation terrain.
 
-- Real-time parcel tracking for delivery personnel
-- Centralized logistics management through Odoo ERP
-- Better traceability and reduced human errors
-- A simple and fast interface optimized for field use
+🛠️ Technologies utilisées
+React Native
 
-> All business data (routes, parcels, statuses) is managed through **Odoo ERP**, and the mobile app communicates with it via **REST API**.
+JavaScript / TypeScript
 
----
+Odoo ERP
 
-## ✨ Features
+API REST
 
-- **User Authentication** — Secure login for delivery personnel
-- **Delivery Routes** — View assigned delivery tours for the day
-- **Parcel Tracking** — Access detailed information for each parcel
-- **Status Updates** — Mark parcels as delivered, failed, or returned in real time
-- **Odoo ERP Integration** — All data synchronized with the central ERP system
-- **REST API Communication** — Clean client-server architecture
-- **Cross-Platform** — Compatible with both Android and iOS devices
-- **Field-Optimized UI** — Simple and fast interface designed for on-the-go use
+Postman
 
----
+Git / GitHub
 
-## 🛠 Tech Stack
+Visual Studio Code
 
-| Technology | Purpose |
-|---|---|
-| React Native | Cross-platform mobile framework (Android & iOS) |
-| TypeScript / JavaScript | Programming languages |
-| Odoo ERP | Central backend and business logic |
-| REST API | Communication between app and Odoo |
-| Postman | API testing and validation before integration |
-| Git / GitHub | Version control and collaboration |
-| Visual Studio Code | Development environment |
-| Expo CLI | Development and build tooling |
+📱 Aperçu de l’application
+Ajoute ici 2 ou 3 captures d’écran de ton application pour rendre le README plus attractif.
 
----
+md
+![Login Screen](screenshots/login.png)
+![Delivery List](screenshots/delivery-list.png)
+![Parcel Details](screenshots/parcel-details.png)
+⚙️ Installation
+Prérequis
+Avant de lancer le projet, assure-toi d’avoir installé :
 
-## 📁 Project Structure
+Node.js
 
-```
-delivery-management-app/
-├── src/
-│   ├── components/          # Reusable UI components (buttons, cards, inputs)
-│   ├── screens/             # Application screens
-│   │   ├── LoginScreen.tsx         # User authentication screen
-│   │   ├── HomeScreen.tsx          # Dashboard and daily summary
-│   │   ├── RoutesScreen.tsx        # List of delivery tours
-│   │   ├── ParcelListScreen.tsx    # Parcels for a selected route
-│   │   ├── ParcelDetailScreen.tsx  # Full details for a single parcel
-│   │   └── StatusUpdateScreen.tsx  # Update delivery status
-│   ├── navigation/          # React Navigation stack and tab configuration
-│   ├── services/            # API service layer — all Odoo REST calls
-│   │   └── api.ts                  # Axios instance + endpoints
-│   ├── utils/               # Helper functions, constants, formatters
-│   └── assets/              # Images, icons, fonts
-├── App.tsx                  # Root component
-├── app.json                 # Expo configuration
-├── package.json
-└── tsconfig.json
-```
+npm ou yarn
 
----
+Expo CLI (si tu utilises Expo)
 
-## 🚀 Getting Started
+Android Studio / émulateur Android
 
-### Prerequisites
+Xcode (pour iOS, si tu es sur Mac)
 
-Make sure you have the following installed:
+Un serveur Odoo accessible avec API REST activée
 
-- [Node.js](https://nodejs.org/) 18+
-- npm or yarn
-- [Expo CLI](https://docs.expo.dev/get-started/installation/)
-- Android Studio (for Android emulator) or Xcode (for iOS)
-- A running Odoo instance with REST API accessible
-
-### Installation
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/chaimaa123-info/delivery-management-app.git
+Étapes d’installation
+bash
+git clone https://github.com/ton-username/delivery-management-app.git
 cd delivery-management-app
-
-# 2. Install dependencies
 npm install
+▶️ Lancement du projet
+Si le projet utilise Expo :
 
-# 3. Start the development server
+bash
 npx expo start
-```
+Si tu utilises React Native CLI :
 
-### Run on device or emulator
-
-```bash
-# Android
+bash
 npx react-native run-android
-
-# iOS
 npx react-native run-ios
+🔗 Configuration de l’API
+Dans le fichier de configuration du projet, renseigne l’URL de ton serveur Odoo :
 
-# Scan QR code with Expo Go app (physical device)
-npx expo start
-```
+env
+API_BASE_URL=http://localhost:8069
+Adapte cette valeur selon l’adresse réelle de ton serveur Odoo.
 
----
+🧭 Utilisation
+Le livreur se connecte à l’application.
 
-## ⚙️ Configuration
+Il consulte la liste de ses tournées.
 
-Before running the app, configure the API base URL to point to your Odoo instance.
+Il accède aux détails des colis à livrer.
 
-Create a `.env` file at the root of the project:
+Il met à jour le statut de chaque livraison.
 
-```env
-API_BASE_URL=http://your-odoo-server:8069
-API_DB=your_odoo_database
-```
+Les données sont synchronisées avec Odoo ERP via l’API REST.
 
-Then update `src/services/api.ts` to use these environment variables:
+🧱 Structure du projet
+bash
+src/
+ ├── components/      # Composants réutilisables
+ ├── screens/         # Écrans de l’application
+ ├── navigation/      # Navigation entre les écrans
+ ├── services/        # Appels API et logique métier
+ ├── utils/           # Fonctions utilitaires
+ └── assets/          # Images, icônes, polices
+🎯 Objectifs du projet
+Digitaliser le processus de livraison.
 
-```typescript
-import axios from 'axios';
+Améliorer la traçabilité des colis.
 
-const api = axios.create({
-  baseURL: process.env.API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+Simplifier le travail des livreurs.
 
-export default api;
-```
+Réduire les erreurs de traitement.
 
-> Make sure your Odoo instance has the REST API module enabled and the correct CORS settings configured.
+Centraliser les informations dans un système fiable.
 
----
+👩‍💻 Rôle personnel
+Dans le cadre de ce projet, j’ai participé à :
 
-## 📱 App Workflow
+L’analyse du besoin fonctionnel.
 
-```
-1. Delivery person opens the app and logs in
-        ↓
-2. Home screen displays today's assigned routes
-        ↓
-3. User selects a route to see the list of parcels
-        ↓
-4. User taps a parcel to see full delivery details
-        ↓
-5. After delivery attempt, user updates the parcel status
-   (DELIVERED / FAILED / RETURNED)
-        ↓
-6. Status is synchronized with Odoo ERP via REST API
-        ↓
-7. Operations team sees updated data in Odoo dashboard
-```
+La conception de l’application mobile.
 
----
+Le développement des écrans principaux.
 
-## 🏗 Architecture
+L’intégration avec l’API REST d’Odoo.
 
-This application follows a **Mobile Client-Server** architecture:
+Les tests fonctionnels de l’application.
 
-```
-┌─────────────────────────┐         ┌──────────────────────────┐
-│   React Native App      │         │       Odoo ERP           │
-│  (Android / iOS)        │◄───────►│  (Central Backend)       │
-│                         │  REST   │                          │
-│  - UI Screens           │  API    │  - Business Logic        │
-│  - Navigation           │         │  - Database              │
-│  - API Service Layer    │         │  - Delivery Management   │
-└─────────────────────────┘         └──────────────────────────┘
-```
+📈 Améliorations possibles
+Intégration du scan de code-barres.
 
-| Layer | Technology | Responsibility |
-|---|---|---|
-| Mobile Frontend | React Native + TypeScript | UI, navigation, user interaction |
-| API Service | Axios + REST | HTTP calls to Odoo endpoints |
-| Backend / ERP | Odoo 16 | Business logic, data storage, route management |
-| API Testing | Postman | Endpoint validation before mobile integration |
+Ajout de la géolocalisation.
 
----
+Notifications push pour les livreurs.
 
-## 👩‍💻 My Role
+Historique détaillé des livraisons.
 
-During this internship project, I was responsible for:
+Tableau de bord analytique.
 
-- **Requirements analysis** — Understanding the business needs of delivery operations at Sapress
-- **Functional design** — UML modeling (use case diagrams, sequence diagrams)
-- **Mobile development** — Building all main screens in React Native
-- **API integration** — Connecting the mobile app to Odoo ERP REST endpoints using Axios
-- **Testing** — Functional testing of all screens and API calls with Postman
-- **Documentation** — Writing technical documentation for the project
+Mode hors ligne.
 
----
+🤝 Contribution
+Les contributions sont les bienvenues.
+Si vous souhaitez améliorer ce projet :
 
-## 🔮 Future Improvements
+Forkez le dépôt.
 
-- **Barcode / QR Code scanning** — Scan parcel labels directly from the camera
-- **Geolocation** — Real-time GPS tracking for delivery personnel
-- **Push Notifications** — Instant alerts for new assignments or route changes
-- **Offline Mode** — Continue working without internet, sync when back online
-- **Delivery History** — Detailed logs and delivery performance statistics
-- **Analytics Dashboard** — Visual reports for operations managers
+Créez une branche dédiée.
 
----
+Proposez vos modifications via une Pull Request.
 
-## 👤 Author
+📄 Licence
+Ce projet est développé dans un cadre académique.
 
-**Chaimaa Hajib**
-- GitHub: [@chaimaa123-info](https://github.com/chaimaa123-info)
-- LinkedIn: [Chaimaa Hajib](https://linkedin.com/in/chaimaa-hajib)
-
----
-
+👤 Auteur
+Chaimaa Hajib
+GitHub : chaimaa123-info
+Email : chaimaahajib056@gmail.com
